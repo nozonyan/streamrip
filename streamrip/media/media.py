@@ -2,10 +2,14 @@ from abc import ABC, abstractmethod
 
 
 class Media(ABC):
+    # async def rip(self):
+    #     await self.preprocess()
+    #     await self.download()
+    #     await self.postprocess()
     async def rip(self):
         await self.preprocess()
-        await self.download()
-        await self.postprocess()
+        failed = await self.download()
+        await self.postprocess(failed)
 
     @abstractmethod
     async def preprocess(self):

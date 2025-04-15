@@ -38,7 +38,8 @@ class Track(Media):
             add_title(self.meta.title)
 
     async def download(self):
-        # TODO: progress bar description
+        failed = False  # Flag to track download failure
+        print(f"Downloading tracks from {self.meta.album.album}")
         async with global_download_semaphore(self.config.session.downloads):
             with get_progress_callback(
                 self.config.session.cli.progress_bars,
@@ -50,12 +51,12 @@ class Track(Media):
                     retry = False
                 except Exception as e:
                     logger.error(
-                        f"Error downloading track '{self.meta.title}', retrying: {e}"
+                        f"Error downloading track '{self.meta.title}', ID {self.meta.info.id}, from album {self.meta.album.album},  retrying: {e}"
                     )
                     retry = True
 
             if not retry:
-                return
+                return failed
 
             with get_progress_callback(
                 self.config.session.cli.progress_bars,
@@ -66,21 +67,27 @@ class Track(Media):
                     await self.downloadable.download(self.download_path, callback)
                 except Exception as e:
                     logger.error(
-                        f"Persistent error downloading track '{self.meta.title}', skipping: {e}"
+                        f"Persistent error downloading track '{self.meta.title}', ID {self.meta.info.id}, from album {self.meta.album.album}, skipping: {e}"
                     )
                     self.db.set_failed(
                         self.downloadable.source, "track", self.meta.info.id
                     )
+                    failed = True  # Mark download as failed
 
-    async def postprocess(self):
+        return failed
+
+    async def postprocess(self, failed: bool):
         if self.is_single:
             remove_title(self.meta.title)
 
         await tag_file(self.download_path, self.meta, self.cover_path)
+
         if self.config.session.conversion.enabled:
             await self._convert()
 
-        self.db.set_downloaded(self.meta.info.id)
+        if not failed:  # Only mark as downloaded if successful
+            self.db.set_downloaded(self.meta.info.id)
+            print(f"{self.meta.info.id} added to downloaded!")
 
     async def _convert(self):
         c = self.config.session.conversion

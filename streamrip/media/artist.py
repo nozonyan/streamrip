@@ -42,7 +42,7 @@ class Artist(Media):
         else:
             await self._download_async(filter_conf)
 
-    async def postprocess(self):
+    async def postprocess(self, failed: bool = False):
         pass
 
     async def _resolve_then_download(self, filters: QobuzDiscographyFilterConfig):

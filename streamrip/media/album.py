@@ -48,7 +48,7 @@ class Album(Media):
             if isinstance(result, Exception):
                 logger.error(f"Album track processing error: {result}")
 
-    async def postprocess(self):
+    async def postprocess(self, failed: bool = False):
         progress.remove_title(self.meta.album)
 
 

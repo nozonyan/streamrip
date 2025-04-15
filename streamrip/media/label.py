@@ -45,7 +45,7 @@ class Label(Media):
         for batch in batches:
             await asyncio.gather(*batch)
 
-    async def postprocess(self):
+    async def postprocess(self, failed: bool = False):
         pass
 
     @staticmethod

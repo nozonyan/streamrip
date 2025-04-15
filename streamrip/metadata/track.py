@@ -36,8 +36,8 @@ class TrackMetadata:
 
     @classmethod
     def from_qobuz(cls, album: AlbumMetadata, resp: dict) -> TrackMetadata | None:
-        title = typed(resp["title"].strip(), str)
-        isrc = typed(resp["isrc"], str)
+        title = typed(resp.get("title", "Unknown Title").strip(), str)
+        isrc = typed(resp.get("isrc", ""), str)
         streamable = typed(resp.get("streamable", False), bool)
 
         if not streamable:
@@ -45,27 +45,28 @@ class TrackMetadata:
 
         version = typed(resp.get("version"), str | None)
         work = typed(resp.get("work"), str | None)
-        if version is not None and version not in title:
+
+        if version and version not in title:
             title = f"{title} ({version})"
-        if work is not None and work not in title:
+        if work and work not in title:
             title = f"{work}: {title}"
 
-        composer = typed(resp.get("composer", {}).get("name"), str | None)
+        composer = typed(resp.get("composer", {}).get("name", "Unknown Composer"), str)
         tracknumber = typed(resp.get("track_number", 1), int)
         discnumber = typed(resp.get("media_number", 1), int)
+
         artist = typed(
-            safe_get(
-                resp,
-                "performer",
-                "name",
-            ),
+            safe_get(resp, "performer", "name") or "Unknown Artist",
             str,
         )
-        track_id = str(resp["id"])
-        bit_depth = typed(resp.get("maximum_bit_depth"), int | None)
-        sampling_rate = typed(resp.get("maximum_sampling_rate"), int | float | None)
-        # Is the info included?
-        explicit = False
+
+        track_id = str(resp.get("id", "0"))
+        bit_depth = typed(resp.get("maximum_bit_depth", 16), int | None)
+        sampling_rate = typed(
+            resp.get("maximum_sampling_rate", 44.1), int | float | None
+        )
+
+        explicit = False  # Add logic here if needed later
 
         info = TrackInfo(
             id=track_id,
@@ -75,6 +76,7 @@ class TrackMetadata:
             sampling_rate=sampling_rate,
             work=work,
         )
+
         return cls(
             info=info,
             title=title,
