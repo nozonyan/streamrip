@@ -1,3 +1,4 @@
+import requests
 import asyncio
 import logging
 import os
