@@ -40,6 +40,23 @@ class Album(Media):
             except Exception as e:
                 logger.error(f"Error downloading track: {e}")
 
+        if self.config.session.qobuz.download_booklets:
+            try:
+                booklet = self.meta.info.booklets[0]["url"]
+                booklet_path = os.path.join(
+                    self.folder, f"booklet_{booklet.rsplit('/')[-1]}"
+                )
+            except:
+                booklet = None
+            if booklet and not os.path.isfile(booklet_path):
+                print("Downloading booklet")
+                r = requests.get(booklet)
+                with open(booklet_path, "wb") as f:
+                    f.write(r.content)
+        else:
+            print("Booklet present, but not downloading it, as per config")
+            ##
+
         results = await asyncio.gather(
             *[_resolve_and_download(p) for p in self.tracks], return_exceptions=True
         )
