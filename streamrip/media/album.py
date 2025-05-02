@@ -42,13 +42,16 @@ class Album(Media):
                 logger.error(f"Error downloading track: {e}")
 
         if self.config.session.qobuz.download_booklets:
+            # print("downloading booklet")
             try:
                 booklet = self.meta.info.booklets[0]["url"]
+                # print("booklet available")
                 booklet_path = os.path.join(
                     self.folder, f"booklet_{booklet.rsplit('/')[-1]}"
                 )
             except:
                 booklet = None
+                # print("booketnotavailable")
             if booklet and not os.path.isfile(booklet_path):
                 print("Downloading booklet")
                 r = requests.get(booklet)
