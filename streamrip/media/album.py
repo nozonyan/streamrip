@@ -62,7 +62,7 @@ class Album(Media):
         data.append(
             {
                 "album": self.meta.album,
-                "album_id": self.meta.id,
+                # "album_id": self.meta.id,
                 "url": url,
             }
         )
