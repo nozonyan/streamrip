@@ -23,25 +23,6 @@ from pypdf import PdfReader
 logger = logging.getLogger("streamrip")
 
 
-def _register_failed_booklet(self, url: str):
-    data = []
-
-    if os.path.exists(FAILED_LOG):
-        with open(FAILED_LOG, "r") as f:
-            data = json.load(f)
-
-    data.append(
-        {
-            "album": self.meta.album,
-            "album_id": self.meta.id,
-            "url": url,
-        }
-    )
-
-    with open(FAILED_LOG, "w") as f:
-        json.dump(data, f, indent=2)
-
-
 def validate_pdf(filepath: str) -> bool:
     try:
         with open(filepath, "rb") as pdf_file:
@@ -70,6 +51,24 @@ class Album(Media):
     # folder where the tracks will be downloaded
     folder: str
     db: Database
+
+    def _register_failed_booklet(self, url: str):
+        data = []
+
+        if os.path.exists(FAILED_LOG):
+            with open(FAILED_LOG, "r") as f:
+                data = json.load(f)
+
+        data.append(
+            {
+                "album": self.meta.album,
+                "album_id": self.meta.id,
+                "url": url,
+            }
+        )
+
+        with open(FAILED_LOG, "w") as f:
+            json.dump(data, f, indent=2)
 
     async def preprocess(self):
         progress.add_title(self.meta.album)
