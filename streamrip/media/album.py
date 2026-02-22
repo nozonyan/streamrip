@@ -59,13 +59,14 @@ class Album(Media):
             with open(FAILED_LOG, "r") as f:
                 data = json.load(f)
 
-        data.append(
-            {
-                "album": self.meta.album,
-                # "album_id": self.meta.id,
-                "url": url,
-            }
-        )
+        entry = {
+            "album": self.meta.album,
+            "folder": self.folder,
+            "url": url,
+        }
+
+        if entry not in data:
+            data.append(entry)
 
         with open(FAILED_LOG, "w") as f:
             json.dump(data, f, indent=2)
