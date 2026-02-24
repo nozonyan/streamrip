@@ -104,7 +104,7 @@ class Album(Media):
                     if r.status_code != 200:
                         logger.error(f"Failed to download booklet ({r.status_code})")
                         self._register_failed_booklet(booklet)
-                        return
+                        # return
 
                     content_type = r.headers.get("Content-Type", "").lower()
 
@@ -112,7 +112,7 @@ class Album(Media):
                     if "pdf" not in content_type:
                         logger.error(f"Server returned non-PDF content: {content_type}")
                         self._register_failed_booklet(booklet)
-                        return
+                        # return
 
                     with open(booklet_path, "wb") as f:
                         f.write(r.content)
